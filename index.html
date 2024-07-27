@@ -517,6 +517,7 @@ Danke und Viel Spaß!
         function acceptCookies() {
             document.getElementById('cookie-consent').style.display = 'none';
             localStorage.setItem('cookiesAccepted', 'true');
+            location.reload();
         }
 
         function declineCookies() {
@@ -527,7 +528,7 @@ Danke und Viel Spaß!
         }
 
         function checkCookieConsent() {
-            if (!localStorage.getItem('cookiesAccepted')) {
+            if (localStorage.getItem('cookiesAccepted') !== 'true') {
                 document.getElementById('cookie-consent').style.display = 'block';
             }
         }
@@ -619,11 +620,16 @@ Danke und Viel Spaß!
             }
         }
 
-        checkCookieConsent();
-        loadTimes();
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-        showMotivationalMessage();
+        document.addEventListener('DOMContentLoaded', () => {
+            checkCookieConsent();
+            if (localStorage.getItem('cookiesAccepted') === 'true') {
+                document.getElementById('cookie-consent').style.display = 'none';
+                loadTimes();
+                setInterval(updateCountdown, 1000);
+                updateCountdown();
+                showMotivationalMessage();
+            }
+        });
     </script>
 </body>
 </html>
