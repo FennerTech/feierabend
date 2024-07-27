@@ -1,352 +1,398 @@
+<!-- -----------------------------------------------
+    
+Feierabend-Countdown
+(c) 2024 ff. von Marco Fenner
+
+Urheberrechtlich geschützt.
+Kopieren erlaubt.
+Verändern nur mit Namensnennung des Autors ;-)
+Danke und Viel Spaß!
+
+------------------------------------------------ -->
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Feierabend-Countdown - Countdown bis zum Feierabend mit motivierenden Meilensteinen">
-    <meta name="keywords" content="Feierabend, Countdown, Motivation, Arbeitsende, Timer">
-    <meta name="author" content="Marco Fenner">
     <title>Feierabend-Countdown</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #2c3e50;
-            color: #ecf0f1;
+            font-family: 'Arial', sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            height: 100vh;
+            background: #333;
+            color: white;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            flex-direction: column;
         }
+
         .container {
-            background-color: #34495e;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             text-align: center;
-            max-width: 600px;
-            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #444;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
+
+        .remaining-time {
+            font-size: 6em;
+            margin-bottom: 40px;
+            color: yellow;
+        }
+
         h1 {
-            font-size: 2.5em;
-            text-transform: uppercase;
+            font-size: 3em;
             margin-bottom: 10px;
-            color: #3498db;
         }
-        .copyright {
-            font-size: 12px;
-            margin-bottom: 20px;
-            color: #bdc3c7;
+
+        .author {
+            font-size: 11pt;
+            margin: 30px 0;
         }
-        #countdownContainer {
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .button-group button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            background: #555;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button.active {
+            background: #ddd;
+            color: black;
+        }
+
+        .button-group button.disabled {
+            background: #777;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .input-group, .statistics-group {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border: 1px solid #777;
+            padding: 20px;
+            border-radius: 10px;
+            transition: max-height 0.3s ease;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            flex-direction: row;
+        }
+
+        .input-group-left, .input-group-right {
+            flex: 1;
+        }
+
+        .input-group-left {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            justify-content: flex-start;
+            margin-right: 10px;
         }
-        .inputContainer {
+
+        .input-group-left div {
             display: flex;
-            gap: 10px;
+            align-items: center;
             margin-bottom: 20px;
         }
-        input, button {
-            padding: 10px;
-            font-size: 1em;
+
+        .input-group-left label {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .input-group-left input {
+            font-size: 1.2em;
+            padding: 5px;
             border: none;
             border-radius: 5px;
         }
-        input {
-            background-color: #ecf0f1;
-            color: #2c3e50;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        .timeDisplay {
-            font-size: 3em;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-        #seconds {
-            font-size: 4em;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #000;
-            color: #ffeb3b;
-            border-radius: 10px;
-        }
-        #seconds.red {
-            color: #ff0000;
-        }
-        #minutes, #hours {
-            font-size: 1.5em;
-            margin: 10px 0;
-        }
-        .progressContainer {
-            width: 100%;
-            height: 30px;
-            background-color: #2c3e50;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 20px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        #progressBar {
-            height: 100%;
-            background-color: #00008B;
-            transition: width 1s linear;
-        }
-        #progressText {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            font-size: 1em;
-            color: white; /* Schriftfarbe der Prozentanzeige ist immer weiß */
-        }
-        #startTime {
-            position: absolute;
-            left: 10px;
-            color: #ecf0f1;
-            font-weight: bold;
-            font-size: 1em;
-        }
-        #endTime {
-            position: absolute;
-            right: 10px;
-            color: #ecf0f1;
-            font-weight: bold;
-            font-size: 1em;
-        }
-        #milestoneMessage {
-            background-color: #000;
-            color: #fff;
+
+        .input-group-right {
+            background: white;
             padding: 10px;
             border-radius: 5px;
-            margin-top: 10px;
+            color: black;
+            min-width: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            max-width: 150px; /* Rechte Spalte etwas schmaler */
+        }
+
+        .statistics-group h2 {
+            margin-top: 0;
+        }
+
+        .statistics-group p {
+            margin: 0;
+            font-size: 1.4em;
+            display: flex;
+            justify-content: space-between;
             width: 100%;
-            opacity: 0;
-            transition: opacity 1s;
         }
-        #completionMessage {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #27ae60;
-            padding: 30px;
-            border-radius: 15px;
+
+        .statistics-group p span {
+            font-weight: bold;
+        }
+
+        .statistics-group p span.value {
+            color: yellow;
+        }
+
+        #countdown {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            margin-top: 20px;
+        }
+
+        .time-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
-            display: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
-        #closeMessage {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
+
+        .time-box span {
+            display: block;
+        }
+
+        #hours, #minutes, #seconds {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .label {
+            font-size: 1em;
+            margin-top: 10px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #555;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            height: 30px;
+            margin-top: 40px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease, background-color 1s ease;
+        }
+
+        .progress-text {
+            margin-top: 10px;
             font-size: 1.5em;
-        }
-        #impressumButton {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #7f8c8d;
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            cursor: pointer;
         }
-        #impressumModal {
+
+        .motivational-message {
+            font-size: 1.2em;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
             display: none;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
             background-color: white;
-            color: black;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 70%;
+            border-radius: 10px;
+            position: relative;
             overflow-y: auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-        #closeImpressum {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 1.5em;
             color: black;
+            top: 50%;
+            transform: translateY(-50%);
         }
-        #impressumContent {
-            text-align: left;
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
         }
-        #impressumContent h2 {
-            color: #3498db;
-        }
-        #impressumContent a {
-            color: #3498db;
+
+        .close:hover,
+        .close:focus {
+            color: black;
             text-decoration: none;
+            cursor: pointer;
         }
-        #impressumContent a:hover {
-            text-decoration: underline;
-        }
-        #impressumContent strong {
-            color: #e74c3c;
-        }
-        #hintBox {
+
+        .cookie-consent {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            color: black;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #444;
+            color: white;
+            padding: 20px;
             text-align: center;
             z-index: 1000;
         }
-        #closeHint {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 1.5em;
-        }
-        #okHint {
-            margin-top: 20px;
+
+        .cookie-consent button {
+            margin: 0 10px;
             padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
+            font-size: 1em;
+            cursor: pointer;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
         }
-        #okHint:hover {
-            background-color: #2980b9;
+
+        .cookie-consent button.accept {
+            background: #4caf50;
+            color: white;
+        }
+
+        .cookie-consent button.decline {
+            background: #f44336;
+            color: white;
+        }
+
+        .cookie-declined {
+            text-align: center;
+            font-size: 1.5em;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="remaining-time" id="remaining-time"></div>
+    <div class="container" id="main-container">
         <h1>Feierabend-Countdown</h1>
-        <div class="copyright">© 2024 M. Fenner</div>
-        <div id="countdownContainer">
-            <div class="inputContainer">
-                <input type="time" id="endTimeInput">
-                <button id="saveButton">Speichern</button>
+        <div class="author">© 2024 ff. von Marco Fenner</div>
+        <div class="button-group">
+            <button class="toggle-button" onclick="toggleSettings()">Einstellungen &#x25B2;</button>
+            <button class="statistics-button" onclick="toggleStatistics()">Statistik &#x25BC;</button>
+            <button class="impressum-button" onclick="showImpressum()">Impressum</button>
+        </div>
+        <div id="settings" class="input-group hidden">
+            <div class="input-group-left">
+                <div>
+                    <label for="start-time">Arbeitsbeginn:</label>
+                    <input type="time" id="start-time">
+                </div>
+                <div>
+                    <label for="end-time">Feierabend:</label>
+                    <input type="time" id="end-time">
+                </div>
             </div>
-            <div id="timeDisplay" class="timeDisplay"></div>
-            <div id="seconds"></div>
-            <div id="minutes"></div>
-            <div id="hours"></div>
-            <div class="progressContainer">
-                <div id="startTime"></div>
-                <div id="progressBar"></div>
-                <div id="progressText"></div>
-                <div id="endTime"></div>
+            <div class="input-group-right">
+                <script language="JavaScript" src="https://www.besucherzaehler-kostenlos.de/js/counter.js.php?count=1&id=fennertech.github.iofeierabend&start=0&design=3c"></script>
             </div>
-            <div id="milestoneMessage"></div>
+        </div>
+        <div id="statistics" class="statistics-group hidden">
+            <h2>Statistik</h2>
+            <p><span>Verbleibende Sekunden:</span><span class="value" id="remaining-seconds"></span></p>
+            <p><span>Vergangene Sekunden:</span><span class="value" id="elapsed-seconds"></span></p>
+            <p><span>Minuten bis Feierabend:</span><span class="value" id="remaining-minutes"></span></p>
+            <p><span>Stunden bis Feierabend:</span><span class="value" id="remaining-hours"></span></p>
+        </div>
+        <div id="countdown">
+            <div class="time-box">
+                <span id="hours">00</span>
+                <span class="label">Stunden</span>
+            </div>
+            <div class="time-box">
+                <span id="minutes">00</span>
+                <span class="label">Minuten</span>
+            </div>
+            <div class="time-box">
+                <span id="seconds">00</span>
+                <span class="label">Sekunden</span>
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0%</div>
+        <div class="motivational-message" id="motivational-message"></div>
+    </div>
+
+    <div id="impressumModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeImpressum()">&times;</span>
+            <h2>Impressum</h2>
+            <p>Betreiber der Website:</p>
+            <p>Marco Fenner<br>
+            Wiardastraße 19, 26603 Aurich<br>
+            Telefon: 01573-0042105</p>
+            <p>E-Mail: <a href="mailto:datenschrauber@posteo.de">datenschrauber@posteo.de</a></p>
+            <p>Wenn Ihnen dieser Countdown gefällt, würde ich mich über eine kleine Nachricht sehr freuen :-)</p>
+            <p>Diese Seite ist ein privates Projekt und nicht-kommerziell.<br>
+            Diese Seite enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.</p>
+            <p>Diese Seite speichert lediglich die eingegebenen Uhrzeiten lokal und ruft sie beim Laden / Aktualisieren der Seite wieder auf.<br>
+            Der Quelltext ist für alle einsehbar.</p>
+            <p>Viel Spaß und schönen Feierabend! :-)</p>
+            <h4>Info Besucherzähler von besucherzaehler-kostenlos.de</h4>
+            <p>Diese Webseite verwendet einen externen Zähler, um die Anzahl der Webseitenaufrufe zu erfassen. Dafür wird ein Java-Script von einer externe Webseite geladen. Der Server von <a href="https://www.besucherzaehler-kostenlos.de">besucherzaehler-kostenlos.de</a> speichert die IP-Adresse des Zugriffs anonymisiert und zeitlich begrenzt in einer LOG-Datei ab. Diese wird regelmäßig unwiderruflich gelöscht.</p>
+            <p>Um die korrekte Funktionsweise des Zählers zu gewährleisten, speichert der Besucherzähler zudem einen sogenannten Session-Cookie auf dem Computer des Besuchers ab. Dieser wird in der Regel vom Browser gelöscht, sobald er geschlossen wird. In diesem Cookie werden keine persönlichen Informationen gespeichert. Er enthält lediglich die Information der aufgerufenen Domain, sowie einen boolschen Tag (true/false), um den Besucher als bereits gezählt zu markieren.</p>
+            <p>Es werden auch darüberhinaus keine persönlichen oder personenbezogenen Daten vom Besucherzähler erhoben. Eine Nachverfolgung oder Zuordnung der Zugriffe ist zu keiner Zeit möglich. Ein besonderer Dank geht an <a href="https://www.howtodocentral.com">www.howtodocentral.com</a>, durch dessen Unterstützung dieser kostenlose Service erst möglich gemacht wird.</p>
         </div>
     </div>
-    <div id="completionMessage">
-        <span id="closeMessage">&times;</span>
-        <p>Feierabend! Genießen Sie Ihren wohlverdienten Feierabend!</p>
+
+    <div class="cookie-consent" id="cookie-consent">
+        <p>Wir verwenden Cookies für einen einfachen Besucherzähler. Uhrzeiten werden lokal gespeichert.<br>Sind sie damit einverstanden?</p>
+        <button class="accept" onclick="acceptCookies()">Annehmen</button>
+        <button class="decline" onclick="declineCookies()">Ablehnen</button>
     </div>
-    <button id="impressumButton">Impressum</button>
-    <div id="impressumModal">
-        <span id="closeImpressum">&times;</span>
-        <div id="impressumContent">
-            <h2>IMPRESSUM</h2>
-            <p>
-                <strong>Betreiber der Website:</strong>
-            </p>
-            <p>
-                Marco Fenner<br>
-                Wiardastraße 19, 26603 Aurich<br>
-                Telefon: 01573-0042105
-            </p>
-            <p>
-                E-Mail: <a href="mailto:datenschrauber@posteo.de">datenschrauber@posteo.de</a>
-            </p>
-            <p>
-                <strong>Wenn Ihnen dieser Countdown gefällt, würde ich mich über eine kleine Nachricht sehr freuen :-)</strong>
-            </p>
-            <p>
-                Diese Seite ist ein privates Projekt und nicht-kommerziell.<br>
-                Diese Seite enthält keine externen Links.<br>
-                Diese Seite speichert keine Cookies.<br>
-                Diese Seite speichert lediglich die eingegebene Uhrzeit lokal und ruft sie beim Laden / Aktualisieren der Seite wieder auf.<br>
-                Der Quelltext ist für alle einsehbar.
-            </p>
-            <p>
-                Viel Spaß und schönen Feierabend!  :-)
-            </p>
-        </div>
-    </div>
-    <div id="hintBox" style="display: none;">
-        <span id="closeHint">&times;</span>
-        <p>Bitte geben Sie zunächst Ihre Feierabend-Uhrzeit ein und klicken Sie auf 'Speichern'!</p>
-        <button id="okHint">OK</button>
-    </div>
+
+    <div id="cookie-declined" class="cookie-declined hidden">Sorry. Sie haben die Verwendung von Cookies abgelehnt. Die Website kann daher nicht angezeigt werden.</div>
 
     <script>
-        const endTimeInput = document.getElementById('endTimeInput');
-        const saveButton = document.getElementById('saveButton');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const secondsElement = document.getElementById('seconds');
-        const minutesElement = document.getElementById('minutes');
-        const hoursElement = document.getElementById('hours');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const startTimeElement = document.getElementById('startTime');
-        const endTimeElement = document.getElementById('endTime');
-        const milestoneMessage = document.getElementById('milestoneMessage');
-        const completionMessage = document.getElementById('completionMessage');
-        const closeMessage = document.getElementById('closeMessage');
-        const impressumButton = document.getElementById('impressumButton');
-        const impressumModal = document.getElementById('impressumModal');
-        const closeImpressum = document.getElementById('closeImpressum');
-        const hintBox = document.getElementById('hintBox');
-        const closeHint = document.getElementById('closeHint');
-        const okHint = document.getElementById('okHint');
-
-        let endTime;
-        let countdownInterval;
-        let startTime;
-
-        const milestones = [
+        const messages = [
             "Halte durch, der Feierabend ist nah!",
             "Nur noch ein bisschen, du schaffst das!",
             "Gleich hast du es geschafft!",
@@ -398,179 +444,186 @@
             "Halte durch, du schaffst das!"
         ];
 
-        function saveEndTime() {
-            const inputTime = endTimeInput.value;
-            if (!inputTime) return;
+        function saveTimes() {
+            localStorage.setItem('start-time', document.getElementById('start-time').value);
+            localStorage.setItem('end-time', document.getElementById('end-time').value);
+        }
 
-            const [hours, minutes] = inputTime.split(':');
-            const now = new Date();
-            endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
-
-            const fiveMinutesInMillis = 5 * 60 * 1000;
-            if (endTime <= now || endTime - now < fiveMinutesInMillis) {
-                endTime = new Date(now.getTime() + fiveMinutesInMillis);
-                alert("Die Feierabend-Uhrzeit muss mindestens 5 Minuten in der Zukunft liegen. Die Zeit wurde automatisch angepasst.");
-                const adjustedHours = endTime.getHours().toString().padStart(2, '0');
-                const adjustedMinutes = endTime.getMinutes().toString().padStart(2, '0');
-                endTimeInput.value = `${adjustedHours}:${adjustedMinutes}`;
+        function loadTimes() {
+            if (localStorage.getItem('start-time')) {
+                document.getElementById('start-time').value = localStorage.getItem('start-time');
+            } else {
+                document.getElementById('start-time').value = "09:00";
             }
-
-            startTime = now;
-            localStorage.setItem('endTime', endTime.toISOString());
-            localStorage.setItem('startTime', startTime.toISOString());
-            localStorage.setItem('firstVisit', 'false');
-            startCountdown();
-            disableSaveButton();
+            if (localStorage.getItem('end-time')) {
+                document.getElementById('end-time').value = localStorage.getItem('end-time');
+            } else {
+                document.getElementById('end-time').value = "17:00";
+            }
         }
 
-        function disableSaveButton() {
-            saveButton.disabled = true;
-            setTimeout(() => {
-                saveButton.disabled = false;
-            }, 2000);
+        function formatNumberWithDots(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        function startCountdown() {
-            clearInterval(countdownInterval);
-            updateCountdown();
-            countdownInterval = setInterval(updateCountdown, 1000);
-            startMilestoneDisplay();
+        function formatNumberWithComma(number) {
+            return number.toFixed(2).replace(".", ",");
+        }
+
+        function toggleSettings() {
+            const settings = document.getElementById('settings');
+            const statistics = document.getElementById('statistics');
+            const settingsButton = document.querySelector('.toggle-button');
+            const statisticsButton = document.querySelector('.statistics-button');
+
+            if (!settings.classList.contains('hidden')) {
+                settings.classList.add('hidden');
+                settingsButton.innerHTML = 'Einstellungen &#x25BC;';
+            } else {
+                settings.classList.remove('hidden');
+                settingsButton.innerHTML = 'Einstellungen &#x25B2;';
+                statistics.classList.add('hidden');
+                statisticsButton.innerHTML = 'Statistik &#x25BC;';
+            }
+        }
+
+        function toggleStatistics() {
+            const statistics = document.getElementById('statistics');
+            const settings = document.getElementById('settings');
+            const statisticsButton = document.querySelector('.statistics-button');
+            const settingsButton = document.querySelector('.toggle-button');
+
+            if (!statistics.classList.contains('hidden')) {
+                statistics.classList.add('hidden');
+                statisticsButton.innerHTML = 'Statistik &#x25BC;';
+            } else {
+                statistics.classList.remove('hidden');
+                statisticsButton.innerHTML = 'Statistik &#x25B2;';
+                settings.classList.add('hidden');
+                settingsButton.innerHTML = 'Einstellungen &#x25BC;';
+            }
+        }
+
+        function showImpressum() {
+            const modal = document.getElementById('impressumModal');
+            modal.style.display = 'block';
+        }
+
+        function closeImpressum() {
+            const modal = document.getElementById('impressumModal');
+            modal.style.display = 'none';
+        }
+
+        function acceptCookies() {
+            document.getElementById('cookie-consent').style.display = 'none';
+            localStorage.setItem('cookiesAccepted', 'true');
+        }
+
+        function declineCookies() {
+            document.getElementById('cookie-consent').style.display = 'none';
+            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('remaining-time').style.display = 'none';
+            document.getElementById('cookie-declined').classList.remove('hidden');
+        }
+
+        function checkCookieConsent() {
+            if (!localStorage.getItem('cookiesAccepted')) {
+                document.getElementById('cookie-consent').style.display = 'block';
+            }
         }
 
         function updateCountdown() {
             const now = new Date();
-            const timeDiff = endTime - now;
-            const elapsedMillis = now - startTime;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
 
-            if (timeDiff <= 0) {
-                clearInterval(countdownInterval);
-                showCompletionMessage();
-                return;
-            }
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
 
-            const totalSeconds = Math.floor(timeDiff / 1000);
-            const totalMinutes = timeDiff / (1000 * 60);
-            const totalHours = timeDiff / (1000 * 60 * 60);
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHours, startMinutes);
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHours, endMinutes);
 
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
+            const totalWorkTime = end - start;
+            const timeElapsed = now - start;
+            const timeRemaining = end - now;
 
-            timeDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            secondsElement.textContent = totalSeconds.toLocaleString('de-DE');
-            minutesElement.textContent = `... oder noch ${totalMinutes.toFixed(2).replace('.', ',')} Minuten`;
-            hoursElement.textContent = `... oder noch ${totalHours.toFixed(2).replace('.', ',')} Stunden`;
+            if (timeElapsed < 0) {
+                document.getElementById('remaining-time').textContent = 'Arbeitszeit hat noch nicht begonnen!';
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-text').textContent = '0%';
+                document.getElementById('progress-text').style.color = 'white';
+            } else if (timeRemaining > 0) {
+                const remainingSeconds = Math.floor(timeRemaining / 1000);
+                const formattedSeconds = formatNumberWithDots(remainingSeconds);
+                document.getElementById('remaining-time').textContent = formattedSeconds;
 
-            updateProgressBar(elapsedMillis, endTime - startTime);
-            updateSecondsHighlight(totalSeconds);
+                if (remainingSeconds < 11) {
+                    document.getElementById('remaining-time').style.color = 'red';
+                } else {
+                    document.getElementById('remaining-time').style.color = 'yellow';
+                }
 
-            startTimeElement.textContent = startTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-            endTimeElement.textContent = endTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        }
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
-        function updateProgressBar(elapsedMillis, totalMillis) {
-            const progress = (elapsedMillis / totalMillis) * 100;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${progress.toFixed(2).replace('.', ',')}% geschafft`;
-        }
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
 
-        function updateSecondsHighlight(seconds) {
-            if (seconds <= 10) {
-                secondsElement.classList.add('red');
+                const progress = (timeElapsed / totalWorkTime) * 100;
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.style.width = `${progress}%`;
+                progressBar.style.backgroundColor = `rgb(${Math.floor(255 - (progress * 2.55))}, ${Math.floor(progress * 2.55)}, 0)`;
+                document.getElementById('progress-text').textContent = `${Math.floor(progress)}%`;
+                document.getElementById('progress-text').style.color = 'white';
+
+                document.getElementById('remaining-seconds').textContent = formatNumberWithDots(remainingSeconds);
+                document.getElementById('elapsed-seconds').textContent = formatNumberWithDots(Math.floor(timeElapsed / 1000));
+                document.getElementById('remaining-minutes').textContent = formatNumberWithComma(remainingSeconds / 60);
+                document.getElementById('remaining-hours').textContent = formatNumberWithComma(remainingSeconds / 3600);
             } else {
-                secondsElement.classList.remove('red');
+                document.getElementById('remaining-time').textContent = 'Feierabend!';
+                document.getElementById('remaining-time').style.color = 'lightgreen';
+                document.getElementById('progress-bar').style.width = '100%';
+                document.getElementById('progress-text').textContent = '100%';
+                document.getElementById('progress-text').style.color = 'white';
             }
         }
 
-        function startMilestoneDisplay() {
-            const displayNextMilestone = () => {
-                milestoneMessage.style.opacity = 0;
-                setTimeout(() => {
-                    const messageIndex = Math.floor(Math.random() * milestones.length);
-                    milestoneMessage.textContent = milestones[messageIndex];
-                    milestoneMessage.style.opacity = 1;
-                }, 15000); // 15 Sekunden Pause
-            };
-            displayNextMilestone();
-            setInterval(displayNextMilestone, Math.random() * (300000 - 60000) + 60000); // Zwischen 1 und 5 Minuten
+        function showMotivationalMessage() {
+            const messageElement = document.getElementById('motivational-message');
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            messageElement.textContent = messages[randomIndex];
+            messageElement.style.opacity = 1;
+            setTimeout(() => {
+                messageElement.style.opacity = 0;
+                setTimeout(showMotivationalMessage, 1000);
+            }, 60000);
         }
 
-        function showCompletionMessage() {
-            completionMessage.style.display = 'block';
-        }
-
-        function hideCompletionMessage() {
-            completionMessage.style.display = 'none';
-        }
-
-        function showImpressum() {
-            impressumModal.style.display = 'block';
-        }
-
-        function hideImpressum() {
-            impressumModal.style.display = 'none';
-        }
-
-        function hideHintBox() {
-            hintBox.style.display = 'none';
-        }
-
-        function setInitialEndTime() {
-            const now = new Date();
-            if (now.getHours() >= 16) {
-                endTime = new Date(now.getTime() + 60 * 60 * 1000); // Systemzeit + 1 Stunde
-            } else {
-                endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 0, 0); // 16 Uhr
-            }
-            const hours = endTime.getHours().toString().padStart(2, '0');
-            const minutes = endTime.getMinutes().toString().padStart(2, '0');
-            endTimeInput.value = `${hours}:${minutes}`;
-            startTime = now;
-            localStorage.setItem('endTime', endTime.toISOString());
-            localStorage.setItem('startTime', startTime.toISOString());
-        }
-
-        saveButton.addEventListener('click', saveEndTime);
-        closeMessage.addEventListener('click', hideCompletionMessage);
-        impressumButton.addEventListener('click', showImpressum);
-        closeImpressum.addEventListener('click', hideImpressum);
-        closeHint.addEventListener('click', hideHintBox);
-        okHint.addEventListener('click', () => {
-            hintBox.style.display = 'none';
+        document.getElementById('start-time').addEventListener('change', () => {
+            saveTimes();
+            updateCountdown();
         });
 
-        const savedEndTime = localStorage.getItem('endTime');
-        const savedStartTime = localStorage.getItem('startTime');
-        if (savedEndTime && savedStartTime) {
-            endTime = new Date(savedEndTime);
-            startTime = new Date(savedStartTime);
-            const now = new Date();
+        document.getElementById('end-time').addEventListener('change', () => {
+            saveTimes();
+            updateCountdown();
+        });
 
-            const fiveMinutesInMillis = 5 * 60 * 1000;
-            if (endTime <= now || endTime - now < fiveMinutesInMillis) {
-                endTime = new Date(now.getTime() + 3600000); // Eine Stunde in die Zukunft
-                alert("Die gespeicherte Feierabend-Uhrzeit liegt in der Vergangenheit und wurde auf eine Stunde in der Zukunft gesetzt.");
-                localStorage.setItem('endTime', endTime.toISOString());
-                const adjustedHours = endTime.getHours().toString().padStart(2, '0');
-                const adjustedMinutes = endTime.getMinutes().toString().padStart(2, '0');
-                endTimeInput.value = `${adjustedHours}:${adjustedMinutes}`;
+        window.onclick = function(event) {
+            const modal = document.getElementById('impressumModal');
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
-
-            const hours = endTime.getHours().toString().padStart(2, '0');
-            const minutes = endTime.getMinutes().toString().padStart(2, '0');
-            endTimeInput.value = `${hours}:${minutes}`;
-            startCountdown();
-        } else {
-            setInitialEndTime();
-            hintBox.style.display = 'block';
         }
 
-        const firstVisit = localStorage.getItem('firstVisit');
-        if (!firstVisit) {
-            setInitialEndTime();
-            hintBox.style.display = 'block';
-            localStorage.setItem('firstVisit', 'false');
-        }
+        checkCookieConsent();
+        loadTimes();
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+        showMotivationalMessage();
     </script>
 </body>
 </html>
