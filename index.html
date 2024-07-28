@@ -1,7 +1,7 @@
 <!-- -----------------------------------------------
     
 Feierabend-Countdown
-(c) 2024 ff. von Marco Fenner
+(c) 2024 Marco Fenner
 
 Urheberrechtlich geschützt.
 Kopieren erlaubt.
@@ -15,6 +15,16 @@ Danke und Viel Spaß!
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Feierabend-Countdown: Berechne die verbleibende Zeit bis zum Feierabend.">
+    <meta name="keywords" content="Feierabend, Countdown, Arbeitszeit, Marco Fenner">
+    <meta name="author" content="Marco Fenner">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Feierabend-Countdown">
+    <meta property="og:description" content="Feierabend-Countdown: Berechne die verbleibende Zeit bis zum Feierabend.">
+    <meta property="og:url" content="https://fennertech.github.io/feierabend/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="">
+    <link rel="icon" type="image/png" href="https://fennertech.github.io/feierabend/uhr.ico">
     <title>Feierabend-Countdown</title>
     <style>
         body {
@@ -44,6 +54,12 @@ Danke und Viel Spaß!
             font-size: 6em;
             margin-bottom: 40px;
             color: yellow;
+        }
+
+        .work-start-future {
+            font-size: 3em;
+            margin-bottom: 40px;
+            color: red;
         }
 
         h1 {
@@ -83,6 +99,21 @@ Danke und Viel Spaß!
             background: #777;
             color: #aaa;
             cursor: not-allowed;
+        }
+
+        .button-group button.minimize-button {
+            font-size: 1.5em;
+            padding: 5px 10px;
+            background: #555;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button.minimize-button::before {
+            content: "▢";
         }
 
         .input-group, .statistics-group {
@@ -143,7 +174,7 @@ Danke und Viel Spaß!
             justify-content: center;
             align-items: center;
             text-align: center;
-            max-width: 150px; /* Rechte Spalte etwas schmaler */
+            max-width: 150px;
         }
 
         .statistics-group h2 {
@@ -310,6 +341,7 @@ Danke und Viel Spaß!
 </head>
 <body>
     <div class="remaining-time" id="remaining-time"></div>
+    <div class="work-start-future hidden" id="work-start-future">Arbeit beginnt später!</div>
     <div class="container" id="main-container">
         <h1>Feierabend-Countdown</h1>
         <div class="author">© 2024 Marco Fenner</div>
@@ -317,6 +349,7 @@ Danke und Viel Spaß!
             <button class="toggle-button" onclick="toggleSettings()">Einstellungen &#x25B2;</button>
             <button class="statistics-button" onclick="toggleStatistics()">Statistik &#x25BC;</button>
             <button class="impressum-button" onclick="showImpressum()">Impressum</button>
+            <button class="minimize-button" onclick="minimizeDisplay()"></button>
         </div>
         <div id="settings" class="input-group hidden">
             <div class="input-group-left">
@@ -335,10 +368,10 @@ Danke und Viel Spaß!
         </div>
         <div id="statistics" class="statistics-group hidden">
             <h2>Statistik</h2>
-            <p><span>Verbleibende Sekunden:</span><span class="value" id="remaining-seconds"></span></p>
-            <p><span>Vergangene Sekunden:</span><span class="value" id="elapsed-seconds"></span></p>
-            <p><span>Minuten bis Feierabend:</span><span class="value" id="remaining-minutes"></span></p>
-            <p><span>Stunden bis Feierabend:</span><span class="value" id="remaining-hours"></span></p>
+            <p><span>Verbleibende Sekunden:</span><span class="value" id="remaining-seconds">0</span></p>
+            <p><span>Vergangene Sekunden:</span><span class="value" id="elapsed-seconds">0</span></p>
+            <p><span>Minuten bis Feierabend:</span><span class="value" id="remaining-minutes">0</span></p>
+            <p><span>Stunden bis Feierabend:</span><span class="value" id="remaining-hours">0</span></p>
         </div>
         <div id="countdown">
             <div class="time-box">
@@ -379,7 +412,6 @@ Danke und Viel Spaß!
             <h4>Info Besucherzähler von besucherzaehler-kostenlos.de</h4>
             <p>Diese Webseite verwendet einen externen Zähler, um die Anzahl der Webseitenaufrufe zu erfassen. Dafür wird ein Java-Script von einer externe Webseite geladen. Der Server von <a href="https://www.besucherzaehler-kostenlos.de">besucherzaehler-kostenlos.de</a> speichert die IP-Adresse des Zugriffs anonymisiert und zeitlich begrenzt in einer LOG-Datei ab. Diese wird regelmäßig unwiderruflich gelöscht.</p>
             <p>Um die korrekte Funktionsweise des Zählers zu gewährleisten, speichert der Besucherzähler zudem einen sogenannten Session-Cookie auf dem Computer des Besuchers ab. Dieser wird in der Regel vom Browser gelöscht, sobald er geschlossen wird. In diesem Cookie werden keine persönlichen Informationen gespeichert. Er enthält lediglich die Information der aufgerufenen Domain, sowie einen boolschen Tag (true/false), um den Besucher als bereits gezählt zu markieren.</p>
-            <p>Es werden auch darüberhinaus keine persönlichen oder personenbezogenen Daten vom Besucherzähler erhoben. Eine Nachverfolgung oder Zuordnung der Zugriffe ist zu keiner Zeit möglich. Ein besonderer Dank geht an <a href="https://www.howtodocentral.com">www.howtodocentral.com</a>, durch dessen Unterstützung dieser kostenlose Service erst möglich gemacht wird.</p>
         </div>
     </div>
 
@@ -443,6 +475,10 @@ Danke und Viel Spaß!
             "Der Feierabend ist nicht mehr weit!",
             "Halte durch, du schaffst das!"
         ];
+
+        let countdownInterval;
+        let newWindow;
+        let mainWindowClosed = false;
 
         function saveTimes() {
             localStorage.setItem('start-time', document.getElementById('start-time').value);
@@ -514,6 +550,55 @@ Danke und Viel Spaß!
             modal.style.display = 'none';
         }
 
+        function minimizeDisplay() {
+            newWindow = window.open('', '_blank', 'width=400,height=200');
+            newWindow.document.write('<html><head><title>Countdown</title><style>body { background: #333; color: yellow; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-size: 5em; text-align: center; } #new-remaining-time.error { font-size: 12px !important; } a { color: yellow; text-decoration: underline; }</style></head><body>');
+            newWindow.document.write('<div id="new-remaining-time"></div>');
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+
+            newWindow.addEventListener('beforeunload', () => {
+                clearInterval(countdownInterval);
+                mainWindowClosed = true;
+            });
+
+            updateNewWindowCountdown();
+            countdownInterval = setInterval(updateNewWindowCountdown, 1000);
+        }
+
+        function updateNewWindowCountdown() {
+            const now = new Date();
+            const startTime = localStorage.getItem('start-time') || "09:00";
+            const endTime = localStorage.getItem('end-time') || "17:00";
+
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHours, startMinutes);
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHours, endMinutes);
+
+            const timeRemaining = end - now;
+            const timeElapsed = now - start;
+
+            if (mainWindowClosed) {
+                newWindow.document.getElementById('new-remaining-time').innerHTML = `Bitte Feierabend-Countdown öffnen!<br><a href="https://fennertech.github.io/feierabend/index.html" target="_blank">https://fennertech.github.io/feierabend/</a>`;
+                newWindow.document.getElementById('new-remaining-time').classList.add('error');
+                return;
+            }
+
+            if (timeElapsed < 0) {
+                newWindow.document.getElementById('new-remaining-time').textContent = "Arbeit beginnt später!";
+                newWindow.document.getElementById('new-remaining-time').classList.add('error');
+            } else if (timeRemaining > 0) {
+                const remainingSeconds = Math.floor(timeRemaining / 1000);
+                newWindow.document.getElementById('new-remaining-time').textContent = formatNumberWithDots(remainingSeconds);
+                newWindow.document.getElementById('new-remaining-time').classList.remove('error');
+            } else {
+                newWindow.document.getElementById('new-remaining-time').textContent = 'Feierabend!';
+                newWindow.document.getElementById('new-remaining-time').classList.remove('error');
+            }
+        }
+
         function acceptCookies() {
             document.getElementById('cookie-consent').style.display = 'none';
             localStorage.setItem('cookiesAccepted', 'true');
@@ -549,11 +634,22 @@ Danke und Viel Spaß!
             const timeRemaining = end - now;
 
             if (timeElapsed < 0) {
-                document.getElementById('remaining-time').textContent = 'Arbeitszeit hat noch nicht begonnen!';
+                document.getElementById('remaining-time').classList.add('hidden');
+                document.getElementById('work-start-future').classList.remove('hidden');
                 document.getElementById('progress-bar').style.width = '0%';
                 document.getElementById('progress-text').textContent = '0%';
                 document.getElementById('progress-text').style.color = 'white';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                document.getElementById('remaining-seconds').textContent = '0';
+                document.getElementById('elapsed-seconds').textContent = '0';
+                document.getElementById('remaining-minutes').textContent = '0';
+                document.getElementById('remaining-hours').textContent = '0';
+                document.title = 'Arbeit beginnt später!';
             } else if (timeRemaining > 0) {
+                document.getElementById('remaining-time').classList.remove('hidden');
+                document.getElementById('work-start-future').classList.add('hidden');
                 const remainingSeconds = Math.floor(timeRemaining / 1000);
                 const formattedSeconds = formatNumberWithDots(remainingSeconds);
                 document.getElementById('remaining-time').textContent = formattedSeconds;
@@ -583,12 +679,27 @@ Danke und Viel Spaß!
                 document.getElementById('elapsed-seconds').textContent = formatNumberWithDots(Math.floor(timeElapsed / 1000));
                 document.getElementById('remaining-minutes').textContent = formatNumberWithComma(remainingSeconds / 60);
                 document.getElementById('remaining-hours').textContent = formatNumberWithComma(remainingSeconds / 3600);
+
+                localStorage.setItem('remaining-time', formattedSeconds);
+
+                document.title = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} (${formattedSeconds})`;
             } else {
+                document.getElementById('remaining-time').classList.remove('hidden');
+                document.getElementById('work-start-future').classList.add('hidden');
                 document.getElementById('remaining-time').textContent = 'Feierabend!';
                 document.getElementById('remaining-time').style.color = 'lightgreen';
                 document.getElementById('progress-bar').style.width = '100%';
                 document.getElementById('progress-text').textContent = '100%';
                 document.getElementById('progress-text').style.color = 'white';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+
+                document.title = 'Feierabend!';
+            }
+
+            if (newWindow && !newWindow.closed) {
+                updateNewWindowCountdown();
             }
         }
 
@@ -630,7 +741,14 @@ Danke und Viel Spaß!
                 showMotivationalMessage();
             }
         });
+
+        window.addEventListener('beforeunload', () => {
+            mainWindowClosed = true;
+            if (newWindow && !newWindow.closed) {
+                newWindow.document.getElementById('new-remaining-time').innerHTML = `Bitte Feierabend-Countdown öffnen!<br><a href="https://fennertech.github.io/feierabend/index.html" target="_blank">https://fennertech.github.io/feierabend/</a>`;
+                newWindow.document.getElementById('new-remaining-time').classList.add('error');
+            }
+        });
     </script>
 </body>
 </html>
-
